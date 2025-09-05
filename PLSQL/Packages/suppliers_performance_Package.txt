@@ -1,0 +1,119 @@
+------------------------------------------------------------
+-- 2. Supplier Performance Package
+-- Purpose: Provides supplier KPI (Key Performance Indicator) calculations.
+-- KPIs:
+--   1. Average Quality
+--   2. On-Time Delivery Rate
+--   3. Rejection Rate
+--   4. Composite Score (weighted)
+------------------------------------------------------------
+create or replace package supplier_perf as
+  -- Returns average quality rating for the supplier
+  function avg_quality(p_supplier_id varchar2) return number;
+
+  -- Returns percentage of deliveries made on or before promised date
+  function on_time_rate(p_supplier_id varchar2) return number;
+
+  -- Returns percentage of rejected quantity vs delivered
+  function rejection_rate(p_supplier_id varchar2) return number;
+
+  -- Returns composite supplier performance score (weighted KPI mix)
+  function composite_score(p_supplier_id varchar2) return number;
+end supplier_perf;
+
+------------------------------------------------------------
+-- Package Body
+------------------------------------------------------------
+create or replace package body supplier_perf as
+
+  -----------------------------------------------------------------
+  -- Average Quality
+  -----------------------------------------------------------------
+  function avg_quality(p_supplier_id varchar2) return number is
+    v_avg number := 0;
+  begin
+    select nvl(avg(quality_rating), 0)
+    into v_avg
+    from supplier_performance
+    where supplier_id = p_supplier_id;
+
+    return v_avg;
+  exception
+    when no_data_found then
+      dbms_output.put_line('⚠ No quality records found for supplier ' || p_supplier_id);
+      return 0;
+    when others then
+      dbms_output.put_line('❌ Error in avg_quality: ' || sqlerrm);
+      return 0;
+  end avg_quality;
+
+  -----------------------------------------------------------------
+  -- On-Time Delivery Rate
+  -----------------------------------------------------------------
+  function on_time_rate(p_supplier_id varchar2) return number is
+    v_rate number := 0;
+  begin
+    select nvl((sum(case when delivery_date <= promised_date then 1 else 0 end) / count(*)) * 100, 0)
+    into v_rate
+    from supplier_performance
+    where supplier_id = p_supplier_id;
+
+    return v_rate;
+  exception
+    when no_data_found then
+      dbms_output.put_line('⚠ No delivery records found for supplier ' || p_supplier_id);
+      return 0;
+    when others then
+      dbms_output.put_line('❌ Error in on_time_rate: ' || sqlerrm);
+      return 0;
+  end on_time_rate;
+
+  -----------------------------------------------------------------
+  -- Rejection Rate
+  -----------------------------------------------------------------
+  function rejection_rate(p_supplier_id varchar2) return number is
+    v_rate number := 0;
+  begin
+    select nvl((sum(quantity_rejected) / nullif(sum(quantity_delivered), 0)) * 100, 0)
+    into v_rate
+    from supplier_performance
+    where supplier_id = p_supplier_id;
+
+    return v_rate;
+  exception
+    when no_data_found then
+      dbms_output.put_line('⚠ No rejection records found for supplier ' || p_supplier_id);
+      return 0;
+    when others then
+      dbms_output.put_line('❌ Error in rejection_rate: ' || sqlerrm);
+      return 0;
+  end rejection_rate;
+
+  -----------------------------------------------------------------
+  -- Composite Score (Weighted Formula)
+  -----------------------------------------------------------------
+  function composite_score(p_supplier_id varchar2) return number is
+    v_quality number := 0;
+    v_ontime  number := 0;
+    v_reject  number := 0;
+    v_score   number := 0;
+  begin
+    -- Call individual KPI functions
+    v_quality := avg_quality(p_supplier_id);
+    v_ontime  := on_time_rate(p_supplier_id);
+    v_reject  := rejection_rate(p_supplier_id);
+
+    -- Composite formula (weights: Quality 50%, On-time 30%, Acceptance 20%)
+    v_score := (v_quality * 0.5) + 
+               (v_ontime * 0.3) + 
+               ((100 - v_reject) * 0.2);
+
+    return v_score;
+  exception
+    when others then
+      dbms_output.put_line('❌ Error in composite_score: ' || sqlerrm);
+      return 0;
+  end composite_score;
+
+end supplier_perf;
+

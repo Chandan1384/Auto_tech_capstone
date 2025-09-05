@@ -1,0 +1,23 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<SharedDataSet xmlns="http://schemas.microsoft.com/sqlserver/reporting/2010/01/shareddatasetdefinition" xmlns:rd="http://schemas.microsoft.com/SQLServer/reporting/reportdesigner">
+  <DataSet Name="DataSet1">
+    <Query>
+      <DataSourceReference>AUTOTECH_USER</DataSourceReference>
+      <CommandText>SELECT 
+    location_id, 
+    location_name
+FROM AUTOMOTIVE_APP.locations
+ORDER BY location_name</CommandText>
+    </Query>
+    <Fields>
+      <Field Name="LOCATION_ID">
+        <DataField>LOCATION_ID</DataField>
+        <rd:TypeName>System.String</rd:TypeName>
+      </Field>
+      <Field Name="LOCATION_NAME">
+        <DataField>LOCATION_NAME</DataField>
+        <rd:TypeName>System.String</rd:TypeName>
+      </Field>
+    </Fields>
+  </DataSet>
+</SharedDataSet>

@@ -1,0 +1,170 @@
+------------------------------------------------------------
+-- 1. Inventory Management Package
+-- Purpose: Encapsulates inventory-related operations:
+--   (A) Checking reorder levels
+--   (B) Transferring stock between locations
+--   (C) Posting inventory transactions (issue/receipt)
+------------------------------------------------------------
+create or replace package inventory_mgmt as
+  
+  -- Checks all items below reorder level and prints alerts
+  procedure check_reorder_levels;
+
+  -- Transfers stock from one location to another
+  procedure transfer_stock(
+    p_product_id   varchar2,
+    p_from_loc     varchar2,
+    p_to_loc       varchar2,
+    p_quantity     number,
+    p_approved_by  varchar2
+  );
+
+  -- Posts inventory transaction (issue/receipt)
+  procedure post_transaction(
+    p_transaction_id   varchar2,
+    p_product_id       varchar2,
+    p_location_id      varchar2,
+    p_transaction_type varchar2,
+    p_quantity         number,
+    p_unit_cost        number,
+    p_reference_no     varchar2,
+    p_created_by       varchar2
+  );
+
+end inventory_mgmt;
+/
+------------------------------------------------------------
+-- Package Body
+------------------------------------------------------------
+create or replace package body inventory_mgmt as
+
+  -----------------------------------------------------------------
+  -- Procedure: check_reorder_levels
+  -- Purpose  : Print alerts if stock falls below reorder level
+  -----------------------------------------------------------------
+  procedure check_reorder_levels is
+  begin
+    for rec in (
+      select product_id, location_id, current_stock, reorder_level
+      from inventory_master
+      where current_stock < reorder_level
+    ) loop
+      dbms_output.put_line(
+        '⚠ Reorder alert → Product: ' || rec.product_id || 
+        ', Location: ' || rec.location_id ||
+        ', Stock: ' || rec.current_stock || 
+        ', Reorder Level: ' || rec.reorder_level
+      );
+    end loop;
+  exception
+    when others then
+      dbms_output.put_line('❌ Error in check_reorder_levels: ' || sqlerrm);
+  end check_reorder_levels;
+
+  -----------------------------------------------------------------
+  -- Procedure: transfer_stock
+  -- Purpose  : Moves stock from one location to another
+  -----------------------------------------------------------------
+  procedure transfer_stock(
+    p_product_id   varchar2,
+    p_from_loc     varchar2,
+    p_to_loc       varchar2,
+    p_quantity     number,
+    p_approved_by  varchar2
+  ) is
+  begin
+    if p_from_loc = p_to_loc then
+      raise_application_error(-20010, '❌ From and To locations cannot be the same.');
+    end if;
+
+    -- Deduct from source location
+    update inventory_master
+    set current_stock = current_stock - p_quantity
+    where product_id = p_product_id
+      and location_id = p_from_loc;
+
+    -- Add to destination location
+    update inventory_master
+    set current_stock = current_stock + p_quantity
+    where product_id = p_product_id
+      and location_id = p_to_loc;
+
+    -- Insert transfer log
+    insert into stock_transfers (
+      transfer_id, product_id, from_loc, to_loc, quantity,
+      transfer_date, approved_by, status
+    )
+    values (
+      'TR-' || to_char(sysdate, 'yyyymmddhh24miss'),
+      p_product_id, p_from_loc, p_to_loc,
+      p_quantity, sysdate, p_approved_by, 'completed'
+    );
+
+    dbms_output.put_line('✅ Stock transfer completed successfully.');
+  exception
+    when others then
+      dbms_output.put_line('❌ Error in transfer_stock: ' || sqlerrm);
+      rollback;
+  end transfer_stock;
+
+  -----------------------------------------------------------------
+  -- Procedure: post_transaction
+  -- Purpose  : Posts a stock issue or receipt transaction
+  -----------------------------------------------------------------
+  procedure post_transaction(
+    p_transaction_id   varchar2,
+    p_product_id       varchar2,
+    p_location_id      varchar2,
+    p_transaction_type varchar2,
+    p_quantity         number,
+    p_unit_cost        number,
+    p_reference_no     varchar2,
+    p_created_by       varchar2
+  ) is
+    v_stock number;
+  begin
+    -- Get current stock
+    select current_stock
+    into v_stock
+    from inventory_master
+    where product_id = p_product_id
+      and location_id = p_location_id;
+
+    -- Validation for issue transactions
+    if p_transaction_type = 'issue' and p_quantity > v_stock then
+      raise_application_error(-20020, '❌ Insufficient stock at location ' || p_location_id);
+    end if;
+
+    -- Insert into transactions table
+    insert into inventory_transactions (
+      transaction_id, product_id, location_id, transaction_type,
+      quantity, unit_cost, transaction_date, reference_no, created_by
+    )
+    values (
+      nvl(p_transaction_id, 'TXN-' || to_char(sysdate, 'yyyymmddhh24miss')),
+      p_product_id, p_location_id, p_transaction_type,
+      p_quantity, p_unit_cost, sysdate, p_reference_no, p_created_by
+    );
+
+    -- Adjust stock levels
+    if p_transaction_type = 'receipt' then
+      update inventory_master
+      set current_stock = current_stock + p_quantity
+      where product_id = p_product_id and location_id = p_location_id;
+    elsif p_transaction_type = 'issue' then
+      update inventory_master
+      set current_stock = current_stock - p_quantity
+      where product_id = p_product_id and location_id = p_location_id;
+    end if;
+
+    dbms_output.put_line('✅ Transaction posted successfully.');
+  exception
+    when no_data_found then
+      dbms_output.put_line('⚠ No inventory record found for product ' || p_product_id || ' at location ' || p_location_id);
+    when others then
+      dbms_output.put_line('❌ Error in post_transaction: ' || sqlerrm);
+      rollback;
+  end post_transaction;
+
+end inventory_mgmt;
+

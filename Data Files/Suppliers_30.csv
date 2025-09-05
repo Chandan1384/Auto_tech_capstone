@@ -1,0 +1,31 @@
+Supplier_id,Supplier Name,Country,supplier_type,quality_rating,lead_time_days,payment_terms,certification,active_status
+YAC-CA-22,Yamaha Components,Canada,OEM,3.8,32,NET30,UL,Y
+BA-IN-19,Bosch Automotive,India,WHOLESALER,4.5,16,NET30,ISO9001,Y
+TATA-IN-20,Tata Motors,India,OEM,5,33,NET30,ISO14001,Y
+PL-BR-25,Phillips Lighting,Brazil,AFTERMARKET,3.6,27,NET60,ISO9001,Y
+SAP-BR-21,Shanghai Auto Parts Co.,Brazil,OEM,2.9,37,NET60,UL,Y
+DA-IN-21,Delphi Automotive,India,AFTERMARKET,3.7,37,NET60,UL,Y
+DC-CA-23,Denso Corporation,Canada,DISTRIBUTOR,2.9,15,NET30,ISO9001,Y
+HL-IN-19,Hella Lighting,India,OEM,3,9,NET30,CE,Y
+MI-IN-22,Minda Industries,India,OEM,3.6,37,NET45,ISO9001,Y
+MM-UK-24,Magneti Marelli,UK,DISTRIBUTOR,3.9,23,NET45,ISO14001,Y
+CA-MX-25,Continental Automotive,Mexico,AFTERMARKET,3.2,38,NET45,,Y
+VE-IN-23,Varroc Engineering,India,WHOLESALER,4.9,45,NET60,UL,Y
+KM-DE-22,Koito Manufacturing,Germany,AFTERMARKET,3.4,37,NET60,IATF16949,Y
+SE-CA-21,Stanley Electric,Canada,OEM,3.9,29,NET45,CE,Y
+VLS-US-19,Valeo Lighting Systems,USA,AFTERMARKET,4.6,8,NET45,ISO9001,Y
+HM-CN-21,Hyundai Mobis,China,OEM,3.7,24,PREPAID,ISO9001,Y
+NGKSP-CA-22,NGK Spark Plug Co.,Canada,DISTRIBUTOR,4.2,16,NET60,IATF16949,Y
+RC-CA-24,Robertshaw Controls,Canada,AFTERMARKET,3.3,26,NET60,CE,Y
+KG-CN-21,Kostal Group,China,AFTERMARKET,3.3,5,NET45,,Y
+HAS-UK-21,Hitachi Automotive Sys.,UK,WHOLESALER,3.2,15,PREPAID,IATF16949,Y
+JCA-KR-22,Johnson Controls Auto.,South Korea,AFTERMARKET,3.1,34,NET60,CE,Y
+FA-DE-19,Faurecia Automotive,Germany,AFTERMARKET,3,37,NET30,UL,Y
+ZFF-IN-19,ZF Friedrichshafen,India,DISTRIBUTOR,2.8,43,NET45,ISO9001,Y
+MC-KR-19,Mando Corporation,South Korea,AFTERMARKET,3.4,42,NET60,,Y
+BA-KR-19,Bridgestone Automotive,South Korea,DISTRIBUTOR,2.5,36,PREPAID,UL,N
+GYRT-MX-24,Goodyear Rubber & Tire,Mexico,OEM,2.8,9,NET45,IATF16949,Y
+BB-BR-21,Brembo Brakes,Brazil,WHOLESALER,4.5,8,PREPAID,CE,Y
+AS-JP-23,Aisin Seiki,Japan,OEM,4.1,44,NET30,ISO9001,Y
+ZL-JP-20,Zebra Lighting,Japan,WHOLESALER,3.9,20,PREPAID,,Y
+WIP-IN-19,Wipro Lighting,India,OEM,4,30,NET30,ISO9001,Y

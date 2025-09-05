@@ -1,0 +1,113 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<SharedDataSet xmlns="http://schemas.microsoft.com/sqlserver/reporting/2010/01/shareddatasetdefinition" xmlns:rd="http://schemas.microsoft.com/SQLServer/reporting/reportdesigner">
+  <DataSet Name="DataSet1">
+    <Query>
+      <DataSourceReference>AUTOTECH_USER</DataSourceReference>
+      <DataSetParameters>
+        <DataSetParameter Name="p_location">
+          <ReadOnly>false</ReadOnly>
+          <Nullable>true</Nullable>
+          <OmitFromQuery>false</OmitFromQuery>
+          <rd:UserDefined>true</rd:UserDefined>
+          <rd:DbType>String</rd:DbType>
+        </DataSetParameter>
+        <DataSetParameter Name="p_from_date">
+          <ReadOnly>false</ReadOnly>
+          <Nullable>false</Nullable>
+          <OmitFromQuery>false</OmitFromQuery>
+          <rd:UserDefined>true</rd:UserDefined>
+          <rd:DbType>DateTime</rd:DbType>
+        </DataSetParameter>
+        <DataSetParameter Name="p_to_date">
+          <ReadOnly>false</ReadOnly>
+          <Nullable>true</Nullable>
+          <OmitFromQuery>false</OmitFromQuery>
+          <rd:UserDefined>true</rd:UserDefined>
+          <rd:DbType>DateTime</rd:DbType>
+        </DataSetParameter>
+      </DataSetParameters>
+      <CommandText>SELECT
+    l.location_id,
+    l.location_name,
+    l.location_type,
+    l.country,
+    p.category,
+    p.product_id,
+    p.product_name,
+    im.current_stock,
+    im.reorder_level,
+    im.max_stock_level,
+    im.safety_stock,
+    im.last_movement_date,
+    im.unit_cost,
+    (im.current_stock * im.unit_cost) AS inventory_value
+FROM AUTOMOTIVE_APP.inventory_master im
+JOIN AUTOMOTIVE_APP.products p
+    ON p.product_id = im.product_id
+JOIN AUTOMOTIVE_APP.locations l
+    ON l.location_id = im.location_id
+WHERE l.location_id = NVL(:p_location, l.location_id)
+  AND im.last_movement_date &gt;= NVL(:p_from_date, im.last_movement_date)
+  AND im.last_movement_date &lt;= NVL(:p_to_date, im.last_movement_date)
+ORDER BY l.location_name, p.category, p.product_name</CommandText>
+    </Query>
+    <Fields>
+      <Field Name="LOCATION_ID">
+        <DataField>LOCATION_ID</DataField>
+        <rd:TypeName>System.String</rd:TypeName>
+      </Field>
+      <Field Name="LOCATION_NAME">
+        <DataField>LOCATION_NAME</DataField>
+        <rd:TypeName>System.String</rd:TypeName>
+      </Field>
+      <Field Name="LOCATION_TYPE">
+        <DataField>LOCATION_TYPE</DataField>
+        <rd:TypeName>System.String</rd:TypeName>
+      </Field>
+      <Field Name="CATEGORY">
+        <DataField>CATEGORY</DataField>
+        <rd:TypeName>System.String</rd:TypeName>
+      </Field>
+      <Field Name="COUNTRY">
+        <DataField>COUNTRY</DataField>
+        <rd:TypeName>System.String</rd:TypeName>
+      </Field>
+      <Field Name="PRODUCT_ID">
+        <DataField>PRODUCT_ID</DataField>
+        <rd:TypeName>System.String</rd:TypeName>
+      </Field>
+      <Field Name="PRODUCT_NAME">
+        <DataField>PRODUCT_NAME</DataField>
+        <rd:TypeName>System.String</rd:TypeName>
+      </Field>
+      <Field Name="CURRENT_STOCK">
+        <DataField>CURRENT_STOCK</DataField>
+        <rd:TypeName>System.Decimal</rd:TypeName>
+      </Field>
+      <Field Name="INVENTORY_VALUE">
+        <DataField>INVENTORY_VALUE</DataField>
+        <rd:TypeName>System.Decimal</rd:TypeName>
+      </Field>
+      <Field Name="REORDER_LEVEL">
+        <DataField>REORDER_LEVEL</DataField>
+        <rd:TypeName>System.Decimal</rd:TypeName>
+      </Field>
+      <Field Name="MAX_STOCK_LEVEL">
+        <DataField>MAX_STOCK_LEVEL</DataField>
+        <rd:TypeName>System.Decimal</rd:TypeName>
+      </Field>
+      <Field Name="SAFETY_STOCK">
+        <DataField>SAFETY_STOCK</DataField>
+        <rd:TypeName>System.Decimal</rd:TypeName>
+      </Field>
+      <Field Name="LAST_MOVEMENT_DATE">
+        <DataField>LAST_MOVEMENT_DATE</DataField>
+        <rd:TypeName>System.DateTime</rd:TypeName>
+      </Field>
+      <Field Name="UNIT_COST">
+        <DataField>UNIT_COST</DataField>
+        <rd:TypeName>System.Decimal</rd:TypeName>
+      </Field>
+    </Fields>
+  </DataSet>
+</SharedDataSet>

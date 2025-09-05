@@ -1,0 +1,62 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<SharedDataSet xmlns="http://schemas.microsoft.com/sqlserver/reporting/2010/01/shareddatasetdefinition" xmlns:rd="http://schemas.microsoft.com/SQLServer/reporting/reportdesigner">
+  <DataSet Name="DataSet1">
+    <Query>
+      <DataSourceReference>AUTOTECH_USER</DataSourceReference>
+      <CommandText>SELECT 
+    im.INVENTORY_ID,
+    im.PRODUCT_ID,
+    im.LOCATION_ID,
+    im.CURRENT_STOCK,
+    im.UNIT_COST,
+    (im.CURRENT_STOCK * im.UNIT_COST) AS STOCK_VALUE,
+    im.LAST_MOVEMENT_DATE,
+
+    CASE 
+        WHEN TRUNC(SYSDATE) - im.LAST_MOVEMENT_DATE BETWEEN 0 AND 30 THEN '0-30 Days'
+        WHEN TRUNC(SYSDATE) - im.LAST_MOVEMENT_DATE BETWEEN 31 AND 60 THEN '31-60 Days'
+        WHEN TRUNC(SYSDATE) - im.LAST_MOVEMENT_DATE BETWEEN 61 AND 90 THEN '61-90 Days'
+        ELSE '90+ Days'
+    END AS AGING_BUCKET
+
+FROM AUTOMOTIVE_APP.INVENTORY_MASTER im
+WHERE im.CURRENT_STOCK &gt; 0
+ORDER BY im.PRODUCT_ID, im.LOCATION_ID
+</CommandText>
+    </Query>
+    <Fields>
+      <Field Name="INVENTORY_ID">
+        <DataField>INVENTORY_ID</DataField>
+        <rd:TypeName>System.String</rd:TypeName>
+      </Field>
+      <Field Name="PRODUCT_ID">
+        <DataField>PRODUCT_ID</DataField>
+        <rd:TypeName>System.String</rd:TypeName>
+      </Field>
+      <Field Name="LOCATION_ID">
+        <DataField>LOCATION_ID</DataField>
+        <rd:TypeName>System.String</rd:TypeName>
+      </Field>
+      <Field Name="CURRENT_STOCK">
+        <DataField>CURRENT_STOCK</DataField>
+        <rd:TypeName>System.Decimal</rd:TypeName>
+      </Field>
+      <Field Name="UNIT_COST">
+        <DataField>UNIT_COST</DataField>
+        <rd:TypeName>System.Decimal</rd:TypeName>
+      </Field>
+      <Field Name="STOCK_VALUE">
+        <DataField>STOCK_VALUE</DataField>
+        <rd:TypeName>System.Decimal</rd:TypeName>
+      </Field>
+      <Field Name="LAST_MOVEMENT_DATE">
+        <DataField>LAST_MOVEMENT_DATE</DataField>
+        <rd:TypeName>System.DateTime</rd:TypeName>
+      </Field>
+      <Field Name="AGING_BUCKET">
+        <DataField>AGING_BUCKET</DataField>
+        <rd:TypeName>System.String</rd:TypeName>
+      </Field>
+    </Fields>
+  </DataSet>
+</SharedDataSet>

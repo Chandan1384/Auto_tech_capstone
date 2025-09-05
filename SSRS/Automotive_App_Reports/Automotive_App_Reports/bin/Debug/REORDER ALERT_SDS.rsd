@@ -1,0 +1,68 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<SharedDataSet xmlns="http://schemas.microsoft.com/sqlserver/reporting/2010/01/shareddatasetdefinition" xmlns:rd="http://schemas.microsoft.com/SQLServer/reporting/reportdesigner">
+  <DataSet Name="DataSet1">
+    <Query>
+      <DataSourceReference>AUTOTECH_USER</DataSourceReference>
+      <CommandText>SELECT 
+    l.LOCATION_ID,
+    l.LOCATION_NAME,
+    p.PRODUCT_ID,
+    p.PRODUCT_NAME,
+    p.CATEGORY,
+    i.CURRENT_STOCK,
+    i.REORDER_LEVEL,
+    i.SAFETY_STOCK,
+    i.MAX_STOCK_LEVEL,
+    (i.REORDER_LEVEL - i.CURRENT_STOCK) AS SHORTFALL
+FROM AUTOMOTIVE_APP.INVENTORY_MASTER i
+JOIN AUTOMOTIVE_APP.PRODUCTS p 
+  ON i.PRODUCT_ID = p.PRODUCT_ID
+JOIN AUTOMOTIVE_APP.LOCATIONS l 
+  ON i.LOCATION_ID = l.LOCATION_ID
+WHERE i.CURRENT_STOCK &lt; i.REORDER_LEVEL
+ORDER BY l.LOCATION_NAME, p.CATEGORY, p.PRODUCT_NAME</CommandText>
+    </Query>
+    <Fields>
+      <Field Name="LOCATION_ID">
+        <DataField>LOCATION_ID</DataField>
+        <rd:TypeName>System.String</rd:TypeName>
+      </Field>
+      <Field Name="LOCATION_NAME">
+        <DataField>LOCATION_NAME</DataField>
+        <rd:TypeName>System.String</rd:TypeName>
+      </Field>
+      <Field Name="PRODUCT_ID">
+        <DataField>PRODUCT_ID</DataField>
+        <rd:TypeName>System.String</rd:TypeName>
+      </Field>
+      <Field Name="PRODUCT_NAME">
+        <DataField>PRODUCT_NAME</DataField>
+        <rd:TypeName>System.String</rd:TypeName>
+      </Field>
+      <Field Name="CATEGORY">
+        <DataField>CATEGORY</DataField>
+        <rd:TypeName>System.String</rd:TypeName>
+      </Field>
+      <Field Name="CURRENT_STOCK">
+        <DataField>CURRENT_STOCK</DataField>
+        <rd:TypeName>System.Decimal</rd:TypeName>
+      </Field>
+      <Field Name="REORDER_LEVEL">
+        <DataField>REORDER_LEVEL</DataField>
+        <rd:TypeName>System.Decimal</rd:TypeName>
+      </Field>
+      <Field Name="SAFETY_STOCK">
+        <DataField>SAFETY_STOCK</DataField>
+        <rd:TypeName>System.Decimal</rd:TypeName>
+      </Field>
+      <Field Name="MAX_STOCK_LEVEL">
+        <DataField>MAX_STOCK_LEVEL</DataField>
+        <rd:TypeName>System.Decimal</rd:TypeName>
+      </Field>
+      <Field Name="SHORTFALL">
+        <DataField>SHORTFALL</DataField>
+        <rd:TypeName>System.Decimal</rd:TypeName>
+      </Field>
+    </Fields>
+  </DataSet>
+</SharedDataSet>

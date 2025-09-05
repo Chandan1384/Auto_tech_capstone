@@ -1,0 +1,16 @@
+location_id,location_name,location_type,country,specialization,capacity,active_status
+BNG-IN-91,Bangalore,Plant,India,Control cables & small components,150000,Y
+KAN-USA-1,Kansas,Plant,USA,"Non-automotive cables, exports",90000,Y
+MUN-GER-49,Munich,Plant,Germany,Automotive Lighting,5000,Y
+LON-UK-44,London,R&D,UK,Aftermarket Parts,80000,Y
+JUA-MEX-52,Juarez,Plant,Mexico,Assembly and packaging,200000,Y
+TOK-JAP-886,Tokyo,Warehouse,Japan,High-precision Components,60000,Y
+SHG-CHN-77,Shanghai,Plant,China,Wiring harnesses for EVs,120000,Y
+HYD-IN-91,Hyderabad,R&D,Inda,E-Mobility systems,50000,N
+SYD-AUS-81,Sydney,Warehouse,Australia,Spare parts distribution,30000,Y
+PAR-FRA-55,Paris,Sales Office,France,European aftermarket sales,10000,N
+MUM-IN-91,Mumbai,Plant,India,High Quality Filter Components,85000,Y
+MOS-RUS-92,Moscow,Warehouse,Russia,Cold-climate cable stock,25000,N
+CAI-EGY-15,Cairo,Plant,Egypt,Suspension products,40000,Y
+TOR-CAN-33,Toronto,R&D,Canada,Autonomous driving sensor integration,15000,N
+DBN-SA-70,Durban,Warehouse,South Africa,African regional distribution,20000,Y

@@ -1,0 +1,44 @@
+--------------------------------------------------------------------------------
+-- Trigger Name : TRG_UPDATE_LAST_MOVEMENT
+-- Table        : INVENTORY_MASTER
+-- Timing       : BEFORE UPDATE OF (CURRENT_STOCK, UNIT_COST)
+-- Purpose      : 
+--   Ensures that whenever CURRENT_STOCK or UNIT_COST is modified,
+--   the LAST_MOVEMENT_DATE column is automatically refreshed with
+--   the current system date/time (SYSDATE).
+--
+-- Business Rule :
+--   1. LAST_MOVEMENT_DATE must always reflect the most recent change 
+--      in stock levels or unit cost.
+--
+-- Error Handling :
+--   - All exceptions are captured.
+--   - Errors are re-raised using RAISE_APPLICATION_ERROR with code -20001.
+--   - The raised error includes the trigger name and Oracle's original 
+--     error message for easier debugging and logging.
+--------------------------------------------------------------------------------
+
+CREATE OR REPLACE TRIGGER trg_update_last_movement
+BEFORE UPDATE OF current_stock, unit_cost 
+ON inventory_master
+FOR EACH ROW
+DECLARE
+    v_errmsg VARCHAR2(4000); -- Holds detailed Oracle error message
+BEGIN
+    --------------------------------------------------------------------------
+    -- Main Logic
+    -- If either CURRENT_STOCK or UNIT_COST is updated, 
+    -- refresh LAST_MOVEMENT_DATE to current system date.
+    --------------------------------------------------------------------------
+    :NEW.last_movement_date := SYSDATE;
+
+EXCEPTION
+  
+    WHEN OTHERS THEN
+        v_errmsg := SQLERRM; -- Get exact Oracle error message
+        RAISE_APPLICATION_ERROR(
+            -20001, 
+            'TRG_UPDATE_LAST_MOVEMENT failed: ' || v_errmsg
+        );
+END;
+/

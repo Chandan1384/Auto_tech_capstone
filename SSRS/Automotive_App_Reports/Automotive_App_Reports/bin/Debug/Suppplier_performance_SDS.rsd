@@ -1,0 +1,57 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<SharedDataSet xmlns="http://schemas.microsoft.com/sqlserver/reporting/2010/01/shareddatasetdefinition" xmlns:rd="http://schemas.microsoft.com/SQLServer/reporting/reportdesigner">
+  <DataSet Name="DataSet1">
+    <Query>
+      <DataSourceReference>AUTOTECH_USER</DataSourceReference>
+      <CommandText>SELECT 
+    sp.SUPPLIER_ID,
+    s.SUPPLIER_NAME,
+    TO_CHAR(sp.PERFORMANCE_MONTH, 'MON-YY') AS PERF_MONTH,
+    ROUND(AVG(sp.QUALITY_RATING), 2) AS AVG_QUALITY_RATING,
+    SUM(sp.QUANTITY_DELIVERED) AS TOTAL_DELIVERED,
+    SUM(sp.QUANTITY_REJECTED) AS TOTAL_REJECTED,
+    ROUND((SUM(sp.QUANTITY_REJECTED) / NULLIF(SUM(sp.QUANTITY_DELIVERED), 0)) * 100, 2) AS REJECTION_PERCENT,
+    ROUND((SUM(CASE WHEN sp.DELIVERY_DATE &lt;= sp.PROMISED_DATE THEN 1 ELSE 0 END) / COUNT(*)) * 100, 2) 
+        AS ON_TIME_DELIVERY_PERCENT
+FROM AUTOMOTIVE_APP.SUPPLIER_PERFORMANCE sp
+JOIN AUTOMOTIVE_APP.SUPPLIERS s 
+  ON sp.SUPPLIER_ID = s.SUPPLIER_ID
+GROUP BY sp.SUPPLIER_ID, s.SUPPLIER_NAME, TO_CHAR(sp.PERFORMANCE_MONTH, 'MON-YY')
+ORDER BY s.SUPPLIER_NAME, TO_CHAR(sp.PERFORMANCE_MONTH, 'MON-YY')</CommandText>
+    </Query>
+    <Fields>
+      <Field Name="SUPPLIER_ID">
+        <DataField>SUPPLIER_ID</DataField>
+        <rd:TypeName>System.String</rd:TypeName>
+      </Field>
+      <Field Name="SUPPLIER_NAME">
+        <DataField>SUPPLIER_NAME</DataField>
+        <rd:TypeName>System.String</rd:TypeName>
+      </Field>
+      <Field Name="AVG_QUALITY_RATING">
+        <DataField>AVG_QUALITY_RATING</DataField>
+        <rd:TypeName>System.Decimal</rd:TypeName>
+      </Field>
+      <Field Name="TOTAL_DELIVERED">
+        <DataField>TOTAL_DELIVERED</DataField>
+        <rd:TypeName>System.Decimal</rd:TypeName>
+      </Field>
+      <Field Name="TOTAL_REJECTED">
+        <DataField>TOTAL_REJECTED</DataField>
+        <rd:TypeName>System.Decimal</rd:TypeName>
+      </Field>
+      <Field Name="REJECTION_PERCENT">
+        <DataField>REJECTION_PERCENT</DataField>
+        <rd:TypeName>System.Decimal</rd:TypeName>
+      </Field>
+      <Field Name="ON_TIME_DELIVERY_PERCENT">
+        <DataField>ON_TIME_DELIVERY_PERCENT</DataField>
+        <rd:TypeName>System.Decimal</rd:TypeName>
+      </Field>
+      <Field Name="PERF_MONTH">
+        <DataField>PERF_MONTH</DataField>
+        <rd:TypeName>System.String</rd:TypeName>
+      </Field>
+    </Fields>
+  </DataSet>
+</SharedDataSet>

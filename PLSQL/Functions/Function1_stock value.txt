@@ -1,0 +1,76 @@
+--------------------------------------------------------------------------------
+-- Function Name : fn_calculate_stock_value
+-- Purpose       : To calculate the stock value of a product in a given location.
+--                 Stock value = current_stock * unit_cost.
+--
+-- Parameters    :
+--   p_product_id   - Product identifier
+--   p_location_id  - Location identifier
+--
+-- Returns       : NUMBER
+--   > Returns the calculated stock value if stock and cost are valid.
+--   > Raises an exception if stock value is zero.
+--
+-- Exceptions    :
+--   ORA-20004 : Stock value is zero (either stock or cost is zero).
+--   ORA-20005 : Invalid product/location (no record found).
+--   ORA-20006 : Multiple records found for the given product/location.
+--   ORA-20007 : Unexpected errors during execution.
+--
+-- Created By   : [Your Name]
+-- Created On   : [Date]
+-- Modified By  : [Name], [Date] - [Changes if any]
+--------------------------------------------------------------------------------
+CREATE OR REPLACE FUNCTION fn_calculate_stock_value (
+    p_product_id   VARCHAR2,
+    p_location_id  VARCHAR2
+)
+RETURN NUMBER
+IS
+    v_stock  NUMBER;  -- Holds current stock
+    v_cost   NUMBER;  -- Holds unit cost of the product
+    v_value  NUMBER;  -- Holds calculated stock value
+BEGIN
+    -- Fetch stock and unit cost for the given product and location
+    SELECT current_stock, unit_cost, current_stock * unit_cost
+      INTO v_stock, v_cost, v_value
+      FROM inventory_master
+     WHERE product_id  = p_product_id
+       AND location_id = p_location_id;
+
+    -- Business validation: stock value must not be zero
+    IF NVL(v_stock, 0) = 0 OR NVL(v_cost, 0) = 0 OR NVL(v_value, 0) = 0 THEN
+        RAISE_APPLICATION_ERROR(
+            -20004,
+            'Stock value is zero. Please check current stock and unit cost.'
+        );
+    END IF;
+
+    -- Return the valid stock value
+    RETURN v_value;
+
+EXCEPTION
+    WHEN NO_DATA_FOUND THEN
+        -- No matching record for the given product/location
+        RAISE_APPLICATION_ERROR(
+            -20005,
+            'Invalid details entered: Product ID ' || p_product_id ||
+            ' and Location ID ' || p_location_id
+        );
+
+    WHEN TOO_MANY_ROWS THEN
+        -- Data inconsistency: multiple matching rows
+        RAISE_APPLICATION_ERROR(
+            -20006,
+            'Multiple records found for Product ID ' || p_product_id ||
+            ' and Location ID ' || p_location_id
+        );
+
+    WHEN OTHERS THEN
+        -- Handle unexpected errors gracefully
+        RAISE_APPLICATION_ERROR(
+            -20007,
+            'Unexpected error in fn_calculate_stock_value: ' || SQLERRM
+        );
+END fn_calculate_stock_value;
+/

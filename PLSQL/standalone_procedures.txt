@@ -1,0 +1,69 @@
+------------------------------------------------------------
+-- 3. Automated Reorder Point Calculation (Standalone Procedure)
+-- Purpose: Automatically adjusts reorder levels to 25% of max stock
+------------------------------------------------------------
+create or replace procedure update_reorder_levels is
+begin
+  update inventory_master
+  set reorder_level = ceil(max_stock_level * 0.25)
+  where max_stock_level > 0;
+
+  dbms_output.put_line('✅ Reorder levels updated successfully.');
+exception
+  when others then
+    dbms_output.put_line('❌ Error updating reorder levels: ' || sqlerrm);
+    rollback;
+end;
+
+------------------------------------------------------------
+-- 4. Exception Handling Example (Anonymous Block)
+-- Purpose: Demonstrates invalid transfer handling (same location transfer)
+------------------------------------------------------------
+begin
+  inventory_mgmt.transfer_stock('p-1001', 'loc-a', 'loc-a', 5, 'manager01');
+  commit;
+exception
+  when others then
+    dbms_output.put_line('⚠ Transfer failed: ' || sqlerrm);
+    rollback;
+end;
+
+------------------------------------------------------------
+-- 5. Testing Business Logic
+------------------------------------------------------------
+
+-- (A) Check reorder levels
+prompt ==== Running reorder level check ====
+exec inventory_mgmt.check_reorder_levels;
+
+-- (B) Transfer stock between different locations
+prompt ==== Transferring stock from loc-a to loc-b ====
+exec inventory_mgmt.transfer_stock('p-1001', 'loc-a', 'loc-b', 10, 'manager01');
+
+-- (C) Post a new receipt transaction
+prompt ==== Posting new transaction (receipt) ====
+exec inventory_mgmt.post_transaction(
+  null, 'p-1001', 'loc-b', 'receipt',
+  20, 15.50, 'ref123', 'clerk01'
+);
+
+-- (D) Insert sample data to test triggers
+prompt ==== Inserting into inventory_master (trigger test) ====
+insert into inventory_master
+values ('inv-2001','p-1001','loc-a',100,20,200,50,sysdate,15.50);
+
+prompt ==== Inserting into inventory_transactions (trigger test) ====
+insert into inventory_transactions
+values ('txn-3001','p-1001','loc-a','receipt',5,15.50,sysdate,'ref456','admin');
+
+-- (E) Exception handling: Attempt invalid stock transfer
+prompt ==== Testing invalid transfer (same location) ====
+begin
+  inventory_mgmt.transfer_stock('p-1001', 'loc-a', 'loc-a', 5, 'manager01');
+  commit;
+exception
+  when others then
+    dbms_output.put_line('⚠ Invalid transfer blocked: ' || sqlerrm);
+    rollback;
+end;
+

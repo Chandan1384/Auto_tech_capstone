@@ -1,0 +1,100 @@
+------------------------------------------------------------------------------
+-- Trigger Name   : trg_validate_stock_quantities
+-- Table Name     : inventory_master
+-- Event          : BEFORE INSERT OR UPDATE OF 
+--                  (current_stock, reorder_level, max_stock_level, safety_stock)
+-- Purpose        : Enforce data integrity and business rules on stock fields.
+--
+-- Key Rules Enforced:
+--   1. Prevent negative values for stock quantities.
+--   2. Enforce logical hierarchy between stock levels:
+--        - safety_stock <= reorder_level <= max_stock_level
+--        - current_stock <= max_stock_level
+--   3. Disallow NULL values for stock-related fields (if business requires).
+--
+-- Error Handling:
+--   - Each violation raises a unique Oracle error (-20001 to -20008)
+--     with a clear business-friendly message.
+--   - Unexpected errors are caught in a generic handler (-20999)
+--     for easier debugging and support.
+--
+-- Author         : <Your Name / Team>
+-- Created On     : <Date>
+-- Last Modified  : <Date / Who / What Changed>
+-- Change History :
+--   DD-MON-YYYY - Initial creation
+--   DD-MON-YYYY - Added NULL safety validation
+--
+-- Notes:
+--   * This trigger enforces data-level integrity to supplement application logic.
+--   * Keep error codes (-20001 to -20099) reserved for validation rules only.
+------------------------------------------------------------------------------
+
+CREATE OR REPLACE TRIGGER trg_validate_stock_quantities
+BEFORE INSERT OR UPDATE OF current_stock, reorder_level, max_stock_level, safety_stock
+ON inventory_master
+FOR EACH ROW
+DECLARE
+BEGIN
+    -------------------------------------------------------------------------
+    -- Validation 1: Prevent negative values
+    -------------------------------------------------------------------------
+    IF :NEW.current_stock < 0 THEN
+        RAISE_APPLICATION_ERROR(-20001, 'Current stock cannot be negative.');
+    END IF;
+
+    IF :NEW.reorder_level < 0 THEN
+        RAISE_APPLICATION_ERROR(-20002, 'Reorder level cannot be negative.');
+    END IF;
+
+    IF :NEW.max_stock_level < 0 THEN
+        RAISE_APPLICATION_ERROR(-20003, 'Maximum stock level cannot be negative.');
+    END IF;
+
+    IF :NEW.safety_stock < 0 THEN
+        RAISE_APPLICATION_ERROR(-20004, 'Safety stock cannot be negative.');
+    END IF;
+
+    -------------------------------------------------------------------------
+    -- Validation 2: Enforce logical business rules
+    -------------------------------------------------------------------------
+    -- Rule: Safety stock must not exceed reorder level
+    IF :NEW.safety_stock > :NEW.reorder_level THEN
+        RAISE_APPLICATION_ERROR(-20005, 'Safety stock must not exceed reorder level.');
+    END IF;
+
+    -- Rule: Reorder level must not exceed maximum stock level
+    IF :NEW.reorder_level > :NEW.max_stock_level THEN
+        RAISE_APPLICATION_ERROR(-20006, 'Reorder level cannot exceed maximum stock level.');
+    END IF;
+
+    -- Rule: Current stock must not exceed maximum stock capacity
+    IF :NEW.current_stock > :NEW.max_stock_level THEN
+        RAISE_APPLICATION_ERROR(-20007, 'Current stock cannot exceed maximum stock level.');
+    END IF;
+
+    -------------------------------------------------------------------------
+    -- Validation 3: NULL safety check (optional)
+    -- Enforce NOT NULL if table definition does not already enforce it.
+    -------------------------------------------------------------------------
+    IF :NEW.current_stock IS NULL 
+       OR :NEW.reorder_level IS NULL
+       OR :NEW.max_stock_level IS NULL
+       OR :NEW.safety_stock IS NULL THEN
+        RAISE_APPLICATION_ERROR(-20008, 'Stock-related fields cannot be NULL.');
+    END IF;
+
+EXCEPTION
+    -------------------------------------------------------------------------
+    -- Generic error handler
+    -- Purpose: Provide a controlled failure message for unexpected issues.
+    -- Note   : Always log details externally (via application/DB logs)
+    --          if troubleshooting is needed.
+    -------------------------------------------------------------------------
+    WHEN OTHERS THEN
+        RAISE_APPLICATION_ERROR(
+            -20999, 
+            'Unexpected error in trg_validate_stock_quantities: ' || SQLERRM
+        );
+END;
+/
